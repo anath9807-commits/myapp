@@ -1,57 +1,42 @@
-name: Ultimate Build APK
-on: [push]
+name: Build Android APK
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch: # Isse aap manually bhi action run kar paoge
 
 jobs:
   build:
+    name: Build APK
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          node-version: '18'
 
-      - name: Install Cordova
+      - name: Setup Java JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install Cordova Globally
         run: npm install -g cordova
 
-      - name: Create and Force Build
-        run: |
-          # Sabse pehle clean slate
-          rm -rf super_app
-          
-          # 1. Project setup (Aapki files use karke)
-          cordova create super_app com.vinay.myapp "TestPro"
-          cp index.html super_app/www/index.html
-          cp config.xml super_app/config.xml
-          
-          cd super_app
-          # 2. Stable platform add karein
-          cordova platform add android@13.0.0
-          
-          # 3. Force APK command (Hum system ko default AAB nahi banane denge)
-          cordova build android --release --no-telemetry -- --apk
+      - name: Add Android Platform
+        run: cordova platform add android@12.0.0
 
-      - name: Smart Search and Rescue APKs
-        # Ye step sabse zaroori hai. Ye 'hazaron guna smart' command hai.
-        # Ye poori repository mein jahan bhi .apk file hai, use dhoondh kar 'central_output' folder mein copy kar dega.
-        run: |
-          mkdir -p central_output
-          echo "Bhai, APK dhoondh raha hoon... thodi der ruko!"
-          
-          # Ye command crash-proof search karti hai
-          find /home/runner/work/ -name "*.apk" -type f -exec cp -v {} central_output/ \; || echo "Ghabrao mat Vinay, search thodi alag hui par theek ho jayega."
-          
-          # Dekhte hain kya mila
-          echo "Final files available for download:"
-          ls -R central_output/
+      - name: Build Android APK
+        run: cordova build android
 
-      - name: Upload TestPro Package
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: TestPro-Downloadable-APK
-          # Ab download sirf is central_output folder se hoga, koi path confusion nahi
-          path: central_output/
-          if-no-files-found: error
+          name: Pro-Ludo-Game-APK
+          # YE HAI SABSE IMPORTANT LINE JO ERROR FIX KAREGI 👇
+          path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
