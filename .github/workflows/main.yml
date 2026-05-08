@@ -19,16 +19,25 @@ jobs:
 
       - name: Create App and Build
         run: |
-          cordova create myapp com.vinay.myapp "Test Pro"
-          cp index.html myapp/www/
-          # Ye line config.xml ko sahi jagah copy karegi
-          if [ -f config.xml ]; then cp config.xml myapp/config.xml; fi
+          # 1. Project create karein
+          cordova create myapp com.vinay.myapp "TestPro"
+          
+          # 2. Files ko sahi jagah copy karein (Force copy)
+          cp -f index.html myapp/www/index.html
+          
+          # 3. Check karein agar config.xml hai, toh use project root mein daalein
+          if [ -f config.xml ]; then
+            cp -f config.xml myapp/config.xml
+          fi
+          
+          # 4. Build process
           cd myapp
           cordova platform add android
-          cordova build android --release
+          cordova build android --release --no-telemetry
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: My-App-Release
+          # Path ko thoda "Smart" banaya hai taaki file kahin bhi ho, mil jaye
           path: myapp/platforms/android/app/build/outputs/apk/release/*.apk
