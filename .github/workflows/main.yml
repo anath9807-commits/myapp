@@ -17,28 +17,29 @@ jobs:
       - name: Install Cordova
         run: npm install -g cordova
 
-      - name: Create and Build
+      - name: Final Build Step
         run: |
+          # 1. Purana data saaf karein
           rm -rf myapp
+          
+          # 2. Project banayein (Aapki config.xml ke hisab se)
           cordova create myapp com.vinay.myapp "TestPro"
           
-          [ -f index.html ] && cp index.html myapp/www/index.html
-          [ -f config.xml ] && cp config.xml myapp/config.xml
+          # 3. Aapki files ko project ke andar copy karein
+          cp index.html myapp/www/index.html
+          cp config.xml myapp/config.xml
           
           cd myapp
+          # 4. SDK 34 ke liye sabse sahi version add karein
           cordova platform add android@13.0.0
           
-          # Force APK generation command (Ye sabse zaroori hai)
+          # 5. FORCE APK COMMAND (Ye line APK hi banayegi, AAB nahi)
           cordova build android --release --no-telemetry -- --apk
-          
-          # APK ko dhoondh kar alag folder mein rakhna
-          cd ..
-          mkdir -p output_apk
-          find myapp/platforms/android/app/build/outputs/ -name "*.apk" -exec cp {} output_apk/ \;
 
-      - name: Upload APK
+      - name: Upload Final APK
         uses: actions/upload-artifact@v4
         with:
-          name: My-App-Release-Final
-          path: output_apk/*.apk
+          name: TestPro-Release-APK
+          # Ye "Super Path" poore system mein APK dhoondh lega
+          path: "**/platforms/android/app/build/outputs/apk/release/*.apk"
           if-no-files-found: error
