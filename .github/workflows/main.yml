@@ -17,12 +17,12 @@ jobs:
       - name: Install Cordova
         run: npm install -g cordova
 
-      - name: Create App Structure
+      - name: Create App and Build
         run: |
           cordova create myapp com.vinay.myapp "Test Pro"
-          # Dono files ko sahi jagah copy karna zaroori hai
           cp index.html myapp/www/
-          cp config.xml myapp/
+          # Ye line config.xml ko sahi jagah copy karegi
+          if [ -f config.xml ]; then cp config.xml myapp/config.xml; fi
           cd myapp
           cordova platform add android
           cordova build android --release
@@ -31,5 +31,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: My-App-Release
-          # Wildcard (*) use kiya hai taaki koi bhi release APK mil jaye
           path: myapp/platforms/android/app/build/outputs/apk/release/*.apk
