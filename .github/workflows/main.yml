@@ -1,4 +1,4 @@
-name: Build APK
+name: Ultimate Build APK
 on: [push]
 
 jobs:
@@ -17,29 +17,41 @@ jobs:
       - name: Install Cordova
         run: npm install -g cordova
 
-      - name: Final Build Step
+      - name: Create and Force Build
         run: |
-          # 1. Purana data saaf karein
-          rm -rf myapp
+          # Sabse pehle clean slate
+          rm -rf super_app
           
-          # 2. Project banayein (Aapki config.xml ke hisab se)
-          cordova create myapp com.vinay.myapp "TestPro"
+          # 1. Project setup (Aapki files use karke)
+          cordova create super_app com.vinay.myapp "TestPro"
+          cp index.html super_app/www/index.html
+          cp config.xml super_app/config.xml
           
-          # 3. Aapki files ko project ke andar copy karein
-          cp index.html myapp/www/index.html
-          cp config.xml myapp/config.xml
-          
-          cd myapp
-          # 4. SDK 34 ke liye sabse sahi version add karein
+          cd super_app
+          # 2. Stable platform add karein
           cordova platform add android@13.0.0
           
-          # 5. FORCE APK COMMAND (Ye line APK hi banayegi, AAB nahi)
+          # 3. Force APK command (Hum system ko default AAB nahi banane denge)
           cordova build android --release --no-telemetry -- --apk
 
-      - name: Upload Final APK
+      - name: Smart Search and Rescue APKs
+        # Ye step sabse zaroori hai. Ye 'hazaron guna smart' command hai.
+        # Ye poori repository mein jahan bhi .apk file hai, use dhoondh kar 'central_output' folder mein copy kar dega.
+        run: |
+          mkdir -p central_output
+          echo "Bhai, APK dhoondh raha hoon... thodi der ruko!"
+          
+          # Ye command crash-proof search karti hai
+          find /home/runner/work/ -name "*.apk" -type f -exec cp -v {} central_output/ \; || echo "Ghabrao mat Vinay, search thodi alag hui par theek ho jayega."
+          
+          # Dekhte hain kya mila
+          echo "Final files available for download:"
+          ls -R central_output/
+
+      - name: Upload TestPro Package
         uses: actions/upload-artifact@v4
         with:
-          name: TestPro-Release-APK
-          # Ye "Super Path" poore system mein APK dhoondh lega
-          path: "**/platforms/android/app/build/outputs/apk/release/*.apk"
+          name: TestPro-Downloadable-APK
+          # Ab download sirf is central_output folder se hoga, koi path confusion nahi
+          path: central_output/
           if-no-files-found: error
