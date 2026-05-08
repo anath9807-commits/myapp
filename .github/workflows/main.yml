@@ -27,9 +27,13 @@ jobs:
           cordova platform add android@13.0.0
           cordova build android --release --no-telemetry
 
+      # APK file kahan chhupi hai ye check karne ke liye
+      - name: List Files
+        run: find . -name "*.apk"
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: My-App-Release
-          # Smart path to find APK
-          path: myapp/platforms/android/app/build/outputs/apk/**/*.apk
+          # Ye path ab har jagah APK dhoondh lega
+          path: "**/*.apk"
