@@ -17,21 +17,23 @@ jobs:
       - name: Install Cordova
         run: npm install -g cordova
 
-      - name: Create and Build Release
+      - name: Build Process
         run: |
-          # 1. Project banayein
+          # 1. Purana folder saaf karein
+          rm -rf myapp
+          
+          # 2. Project banayein
           cordova create myapp com.vinay.myapp "TestPro"
           
-          # 2. Files copy karein
+          # 3. Files copy karein
           cp index.html myapp/www/index.html
-          if [ -f config.xml ]; then cp config.xml myapp/config.xml; fi
+          cp config.xml myapp/config.xml
           
           cd myapp
-          # 3. Android Licenses accept karein (Zaroori step)
-          yes | sdkmanager --licenses || true
+          # 4. Stable Android version add karein (Zaroori badlav)
+          cordova platform add android@13.0.0
           
-          # 4. Platform add aur Build
-          cordova platform add android
+          # 5. Build Release
           cordova build android --release --no-telemetry
 
       - name: Upload APK
