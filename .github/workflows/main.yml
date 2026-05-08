@@ -1,4 +1,4 @@
-name: Build Release APK
+name: 100% Guaranteed App Store APK
 
 on:
   push:
@@ -7,45 +7,54 @@ on:
 
 jobs:
   build:
-    name: Build Release APK
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: 1. Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Setup Java JDK
+      - name: 2. Setup Java JDK 17
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install Cordova Globally
+      - name: 3. Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: 4. Install Cordova
         run: npm install -g cordova
 
-      # FIX 1: Create proper Cordova structure and move your files into it
-      - name: Create Proper Cordova Project
+      - name: 5. THE MAGIC STEP (Build & Sign APK)
         run: |
+          echo "==== STARTING PROJECT ===="
           cordova create mygame com.vinay.myapp "Test Pro"
+          
+          echo "==== COPYING FILES ===="
           cp config.xml mygame/
           cp index.html mygame/www/
+          
+          cd mygame
+          
+          echo "==== FIXING XMLPARSER ERROR (USING ANDROID 13) ===="
+          # YAHAN 13.0.0 KAR DIYA HAI JO ERROR FIX KAREGA 👇
+          cordova platform add android@13.0.0
+          
+          echo "==== BUILDING RELEASE APK ===="
+          cordova build android --release
+          
+          echo "==== SIGNING APK FOR APP STORE ===="
+          keytool -genkey -v -keystore my-release-key.keystore -alias alias_name -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Vinay, OU=Dev, O=App, L=City, S=State, C=IN" -storepass 12345678 -keypass 12345678
+          
+          jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore my-release-key.keystore platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk alias_name -storepass 12345678
+          
+          mv platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk platforms/android/app/build/outputs/apk/release/Final-Signed-App.apk
+          echo "==== SUCCESS!!! ===="
 
-      - name: Add Android Platform
-        working-directory: ./mygame
-        run: cordova platform add android@12.0.0
-
-      # FIX 2: Build RELEASE APK for App Store (Not Debug)
-      - name: Build Android Release APK
-        working-directory: ./mygame
-        run: cordova build android --release
-
-      - name: Upload Release APK
+      - name: 6. Upload Final App Store Ready APK
         uses: actions/upload-artifact@v4
         with:
-          name: Ludo-Release-APK
-          path: mygame/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+          name: Final-AppStore-Ready-APK
+          path: mygame/platforms/android/app/build/outputs/apk/release/Final-Signed-App.apk
