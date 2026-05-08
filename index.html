@@ -709,5 +709,17 @@
         function loadAdminShareMsg() { db.ref('admin_settings/share_msg').on('value', s => { shareMessageTemplate = s.val() || "Play Battles on TEST PRO! Use my referral code: [CODE]"; }); }
         function shareApp() { const c = currentUser.uid.substring(0, 6).toUpperCase(); const msg = shareMessageTemplate.replace("[CODE]", c); if(navigator.share) navigator.share({title:'TEST PRO', text: msg}); else window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`); }
     </script>
+        <script src="cordova.js"></script>
+    <script>
+        document.addEventListener("deviceready", function() {
+            document.addEventListener("backbutton", function(e) {
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    navigator.app.exitApp();
+                }
+            }, false);
+        }, false);
+    </script>
 </body>
 </html>
