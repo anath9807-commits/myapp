@@ -17,21 +17,20 @@ jobs:
       - name: Install Cordova
         run: npm install -g cordova
 
-      - name: Create App and Build
+      - name: Create and Build Release
         run: |
-          # 1. Project create karein
+          # 1. Project banayein
           cordova create myapp com.vinay.myapp "TestPro"
           
-          # 2. Files ko sahi jagah copy karein (Force copy)
-          cp -f index.html myapp/www/index.html
+          # 2. Files copy karein
+          cp index.html myapp/www/index.html
+          if [ -f config.xml ]; then cp config.xml myapp/config.xml; fi
           
-          # 3. Check karein agar config.xml hai, toh use project root mein daalein
-          if [ -f config.xml ]; then
-            cp -f config.xml myapp/config.xml
-          fi
-          
-          # 4. Build process
           cd myapp
+          # 3. Android Licenses accept karein (Zaroori step)
+          yes | sdkmanager --licenses || true
+          
+          # 4. Platform add aur Build
           cordova platform add android
           cordova build android --release --no-telemetry
 
@@ -39,5 +38,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: My-App-Release
-          # Path ko thoda "Smart" banaya hai taaki file kahin bhi ho, mil jaye
           path: myapp/platforms/android/app/build/outputs/apk/release/*.apk
