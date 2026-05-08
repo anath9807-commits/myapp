@@ -1,13 +1,13 @@
-name: Build Android APK
+name: Build Release APK
 
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch: # Isse aap manually bhi action run kar paoge
+  workflow_dispatch:
 
 jobs:
   build:
-    name: Build APK
+    name: Build Release APK
     runs-on: ubuntu-latest
 
     steps:
@@ -28,15 +28,24 @@ jobs:
       - name: Install Cordova Globally
         run: npm install -g cordova
 
+      # FIX 1: Create proper Cordova structure and move your files into it
+      - name: Create Proper Cordova Project
+        run: |
+          cordova create mygame com.vinay.myapp "Test Pro"
+          cp config.xml mygame/
+          cp index.html mygame/www/
+
       - name: Add Android Platform
+        working-directory: ./mygame
         run: cordova platform add android@12.0.0
 
-      - name: Build Android APK
-        run: cordova build android
+      # FIX 2: Build RELEASE APK for App Store (Not Debug)
+      - name: Build Android Release APK
+        working-directory: ./mygame
+        run: cordova build android --release
 
-      - name: Upload APK Artifact
+      - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: Pro-Ludo-Game-APK
-          # YE HAI SABSE IMPORTANT LINE JO ERROR FIX KAREGI 👇
-          path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          name: Ludo-Release-APK
+          path: mygame/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
