@@ -1,4 +1,4 @@
-name: 100% Guaranteed App Store APK
+name: 100% Guaranteed App Store AAB
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
       - name: 4. Install Cordova
         run: npm install -g cordova
 
-      - name: 5. THE MAGIC STEP (Build & Sign APK)
+      - name: 5. THE MAGIC STEP (Build & Sign AAB for Play Store)
         run: |
           echo "==== STARTING PROJECT ===="
           cordova create mygame com.vinay.myapp "Test Pro"
@@ -38,23 +38,25 @@ jobs:
           
           cd mygame
           
-          echo "==== FIXING XMLPARSER ERROR (USING ANDROID 13) ===="
-          # YAHAN 13.0.0 KAR DIYA HAI JO ERROR FIX KAREGA 👇
+          echo "==== ADDING ANDROID 13 ===="
           cordova platform add android@13.0.0
           
-          echo "==== BUILDING RELEASE APK ===="
+          echo "==== BUILDING APP BUNDLE (.aab) ===="
           cordova build android --release
           
-          echo "==== SIGNING APK FOR APP STORE ===="
+          echo "==== GENERATING DIGITAL SIGNATURE KEY ===="
           keytool -genkey -v -keystore my-release-key.keystore -alias alias_name -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Vinay, OU=Dev, O=App, L=City, S=State, C=IN" -storepass 12345678 -keypass 12345678
           
-          jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore my-release-key.keystore platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk alias_name -storepass 12345678
+          echo "==== SIGNING .AAB FILE FOR PLAY STORE ===="
+          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore my-release-key.keystore platforms/android/app/build/outputs/bundle/release/app-release.aab alias_name -storepass 12345678
           
-          mv platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk platforms/android/app/build/outputs/apk/release/Final-Signed-App.apk
+          echo "==== RENAMING FINAL FILE ===="
+          mv platforms/android/app/build/outputs/bundle/release/app-release.aab platforms/android/app/build/outputs/bundle/release/Final-PlayStore-Ready.aab
           echo "==== SUCCESS!!! ===="
 
-      - name: 6. Upload Final App Store Ready APK
+      - name: 6. Upload Final Play Store Ready AAB
         uses: actions/upload-artifact@v4
         with:
-          name: Final-AppStore-Ready-APK
-          path: mygame/platforms/android/app/build/outputs/apk/release/Final-Signed-App.apk
+          name: PlayStore-Ready-AAB
+          # Updated path to point to the AAB file
+          path: mygame/platforms/android/app/build/outputs/bundle/release/Final-PlayStore-Ready.aab
