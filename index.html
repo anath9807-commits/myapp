@@ -710,16 +710,29 @@
         function shareApp() { const c = currentUser.uid.substring(0, 6).toUpperCase(); const msg = shareMessageTemplate.replace("[CODE]", c); if(navigator.share) navigator.share({title:'TEST PRO', text: msg}); else window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`); }
     </script>
         <script src="cordova.js"></script>
-    <script>
-        document.addEventListener("deviceready", function() {
-            document.addEventListener("backbutton", function(e) {
-                if (window.history.length > 1) {
-                    window.history.back();
-                } else {
+<script>
+    document.addEventListener("deviceready", function() {
+        
+        document.addEventListener("backbutton", function(e) {
+            // 1. Pehle app ko band hone se rokein
+            e.preventDefault();
+
+            // 2. Check karein ki kya koi modal ya test screen khuli hai
+            // Agar aapke app mein test close karne ka koi function hai (jaise closeAppModal)
+            // toh use yahan call kar sakte hain. 
+
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                // Agar aap home page par hain, toh confirm karein
+                var res = confirm("Kya aap app band karna chahte hain?");
+                if (res) {
                     navigator.app.exitApp();
                 }
-            }, false);
+            }
         }, false);
-    </script>
+
+    }, false);
+</script>
 </body>
 </html>
