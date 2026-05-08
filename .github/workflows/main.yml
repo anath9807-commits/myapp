@@ -19,29 +19,26 @@ jobs:
 
       - name: Create and Build
         run: |
-          # 1. Project setup
           rm -rf myapp
           cordova create myapp com.vinay.myapp "TestPro"
           
-          # 2. Files copy
           [ -f index.html ] && cp index.html myapp/www/index.html
           [ -f config.xml ] && cp config.xml myapp/config.xml
           
           cd myapp
           cordova platform add android@13.0.0
           
-          # 3. Build Release
-          cordova build android --release --no-telemetry
+          # Force APK generation command (Ye sabse zaroori hai)
+          cordova build android --release --no-telemetry -- --apk
           
-          # 4. APK ko dhund kar Main Folder mein lana (Ye sabse zaroori hai)
+          # APK ko dhoondh kar alag folder mein rakhna
           cd ..
           mkdir -p output_apk
-          find myapp/platforms/android/app/build/outputs/apk/ -name "*.apk" -exec cp {} output_apk/ \;
+          find myapp/platforms/android/app/build/outputs/ -name "*.apk" -exec cp {} output_apk/ \;
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: My-App-Release-Final
-          # Ab hum sirf is folder ko upload karenge jisme humne file copy ki hai
           path: output_apk/*.apk
           if-no-files-found: error
