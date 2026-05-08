@@ -80,6 +80,16 @@
     </style>
 </head>
 <body class="no-scrollbar">
+<div id="custom-exit-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
+    <div style="background: #1e1e2e; color: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; border: 1px solid #333; box-shadow: 0 15px 35px rgba(0,0,0,0.6);">
+        <h3 style="margin-top: 0; color: #818cf8; font-size: 20px;">Alvida!</h3>
+        <p style="font-size: 14px; opacity: 0.8; margin-bottom: 25px;">Kya aap sach mein app band karna chahte hain?</p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button onclick="hideExitModal()" style="background: #2d2d3d; color: white; border: none; padding: 12px 25px; border-radius: 12px; flex: 1; font-weight: 600;">Nahi</button>
+            <button onclick="navigator.app.exitApp()" style="background: #818cf8; color: white; border: none; padding: 12px 25px; border-radius: 12px; flex: 1; font-weight: 600;">Haan, Exit</button>
+        </div>
+    </div>
+</div>
 
     <!-- SPLASH SCREEN -->
     <div id="splash-screen" class="fixed inset-0 bg-[#0b0e14] flex flex-col items-center justify-center text-center">
@@ -712,27 +722,25 @@
         <script src="cordova.js"></script>
 <script>
     document.addEventListener("deviceready", function() {
-        
         document.addEventListener("backbutton", function(e) {
-            // 1. Pehle app ko band hone se rokein
-            e.preventDefault();
-
-            // 2. Check karein ki kya koi modal ya test screen khuli hai
-            // Agar aapke app mein test close karne ka koi function hai (jaise closeAppModal)
-            // toh use yahan call kar sakte hain. 
-
-            if (window.history.length > 1) {
-                window.history.back();
+            e.preventDefault(); 
+            var modal = document.getElementById('app-modal');
+            // Agar Test/Modal khula hai toh use band karo
+            if (modal && !modal.classList.contains('hidden')) {
+                closeAppModal(); 
             } else {
-                // Agar aap home page par hain, toh confirm karein
-                var res = confirm("Kya aap app band karna chahte hain?");
-                if (res) {
-                    navigator.app.exitApp();
-                }
+                showExitModal(); // Hamara custom alert dikhayega
             }
         }, false);
-
     }, false);
+
+    function showExitModal() {
+        document.getElementById('custom-exit-modal').style.display = 'flex';
+    }
+    function hideExitModal() {
+        document.getElementById('custom-exit-modal').style.display = 'none';
+    }
 </script>
+
 </body>
 </html>
