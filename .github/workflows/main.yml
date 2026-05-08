@@ -19,25 +19,17 @@ jobs:
 
       - name: Build Process
         run: |
-          # 1. Purana folder saaf karein
           rm -rf myapp
-          
-          # 2. Project banayein
           cordova create myapp com.vinay.myapp "TestPro"
-          
-          # 3. Files copy karein
           cp index.html myapp/www/index.html
           cp config.xml myapp/config.xml
-          
           cd myapp
-          # 4. Stable Android version add karein (Zaroori badlav)
           cordova platform add android@13.0.0
-          
-          # 5. Build Release
           cordova build android --release --no-telemetry
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: My-App-Release
-          path: myapp/platforms/android/app/build/outputs/apk/release/*.apk
+          # Smart path to find APK
+          path: myapp/platforms/android/app/build/outputs/apk/**/*.apk
