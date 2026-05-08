@@ -27,7 +27,7 @@ jobs:
       - name: 4. Install Cordova
         run: npm install -g cordova
 
-      - name: 5. THE MAGIC STEP (Build & Sign AAB for Play Store)
+      - name: 5. THE MAGIC STEP (Build & Sign AAB)
         run: |
           echo "==== STARTING PROJECT ===="
           cordova create mygame com.vinay.myapp "Test Pro"
@@ -44,19 +44,20 @@ jobs:
           echo "==== BUILDING APP BUNDLE (.aab) ===="
           cordova build android --release
           
-          echo "==== GENERATING DIGITAL SIGNATURE KEY ===="
+          echo "==== GENERATING KEYSTORE (CHABHI) ===="
           keytool -genkey -v -keystore my-release-key.keystore -alias alias_name -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Vinay, OU=Dev, O=App, L=City, S=State, C=IN" -storepass 12345678 -keypass 12345678
           
-          echo "==== SIGNING .AAB FILE FOR PLAY STORE ===="
+          echo "==== SIGNING .AAB FILE ===="
           jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore my-release-key.keystore platforms/android/app/build/outputs/bundle/release/app-release.aab alias_name -storepass 12345678
           
           echo "==== RENAMING FINAL FILE ===="
           mv platforms/android/app/build/outputs/bundle/release/app-release.aab platforms/android/app/build/outputs/bundle/release/Final-PlayStore-Ready.aab
           echo "==== SUCCESS!!! ===="
 
-      - name: 6. Upload Final Play Store Ready AAB
+      - name: 6. Upload Final App and Keystore
         uses: actions/upload-artifact@v4
         with:
-          name: PlayStore-Ready-AAB
-          # Updated path to point to the AAB file
-          path: mygame/platforms/android/app/build/outputs/bundle/release/Final-PlayStore-Ready.aab
+          name: App-and-Keystore
+          path: |
+            mygame/platforms/android/app/build/outputs/bundle/release/Final-PlayStore-Ready.aab
+            mygame/my-release-key.keystore
